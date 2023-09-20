@@ -1,0 +1,32 @@
+<% if (editing) { %>
+<form class="product-form" action="/admin/edit-product/<%= product.title %>", method="POST">
+  <div class="form-control">
+    <label for="id">ID</label>
+    <input type="text" name="id" value="<%= product.id %>" readonly>
+  </div>
+<% } else { %>
+<form class="product-form" action="/admin/add-product", method="POST">
+<% } %>
+  <div class="form-control">
+    <label for="title">Title</label>
+    <input type="text" name="title" value="<%= product.title %>" required>
+  </div>
+  <div class="form-control">
+    <label for="imageUrl">image URL</label>
+    <input type="text" name="imageUrl" value="<%= product.imageUrl %>">
+  </div>
+  <div class="form-control">
+    <label for="price">Price</label>
+    <input type="number" step="0.01" name="price" value="<%= product.price %>" required>
+  </div>
+  <div class="form-control">
+    <label for="description">Description</label>
+    <textarea rows="5" name="description"><%= product.description %></textarea>
+  </div>
+  <button type="submit" class="btn"><%= editing ? 'Update': 'Add' %> Product</button>
+</form>
+
+<%- contentFor('styles') %>
+<link rel="stylesheet" href="/css/product.css">
+<link rel="stylesheet" href="/css/forms.css">
+

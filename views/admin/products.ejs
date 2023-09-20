@@ -1,0 +1,31 @@
+<% if (prods.length > 0) { %>
+  <% for (let product of prods) { %>
+    <div class="grid">
+        <article class="card product-item">
+            <header class="card-header">
+              <h1 class="product-title"><%= product.title %></h1>
+            </header>
+            <div class="card-image">
+              <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+            </div>
+            <div class="card-content">
+              <h2 class="product-price">$<%= product.price %></h2>
+              <p class="product-description"><%= product.description %></p>
+            </div>
+            <div class="card-actions">
+              <form action="">
+                <button type="submit" formaction="/admin/edit-product/<%= product.id %>/?edit=true" class="btn">Edit</button>
+                <button type="submit" formaction="/admin/delete-product/<%= product.id %>" formmethod="POST" class="btn">Delete</button>
+              </form>
+            </div>
+        </article>
+    </div>
+  <% } %>
+<% } else { %>
+  <h1>No Products</h1>
+<% } %>
+
+<%- contentFor('styles') %>
+<link rel="stylesheet" href="/css/product.css">
+
+
