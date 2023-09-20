@@ -3,7 +3,7 @@ import { getReasonPhrase } from 'http-status-codes';
 export const renderError = (res, code, pageTitle) => {
     if (!code) {code = 400;}
     if (!pageTitle) {pageTitle = getReasonPhrase(code);}
-    return res.status(code.toString()).render('errors', { code, pageTitle, path: '' });
+    return res.status(code).render('errors', { code, pageTitle, path: '' });
 }
 
 export const errorHandler = ({code, pageTitle}) => {

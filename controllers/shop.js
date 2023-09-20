@@ -9,7 +9,13 @@ export const getIndex = (req, res, next) => {
 
 export const getProducts = (req, res, next) => {
     (async () => {
-        const products = await Product.fetchAll();
+        let products = [];
+        try {
+            const [rows, fieldData] = await Product.fetchAll();
+            products = rows;
+        } catch (e) {
+            console.error(e);
+        }
         res.render('shop/product-list', { prods: products, pageTitle: 'Shop', path: req.originalUrl });
     })();
 };
@@ -18,7 +24,8 @@ export const getProduct = (req, res, next) => {
     (async () => {
         let product;
         try {
-            product = await Product.findById(req.params.productId);
+            const [row, fieldData] = await Product.findById(req.params.productId);
+            product = row;
         } catch (e) {
             renderError(res, 404, e.message);
             return
@@ -31,7 +38,14 @@ export const getProduct = (req, res, next) => {
 export const getCart = (req, res, next) => {
     (async () => {
         const cart = await Cart.getCart();
-        const products = await Product.fetchAll();
+
+        let products = [];
+        try {
+            const [rows, fieldData] = await Product.fetchAll();
+            products = rows;
+        } catch (e) {
+            console.error(e);
+        }
 
         const prods = [];
         for (let c of cart.products) {
@@ -57,7 +71,8 @@ export const postCart = (req, res, next) => {
     (async () => {
         let product;
         try {
-            product = await Product.findById(productId);
+            const [row, fieldData] = await Product.findById(productId);
+            product = row;
         } catch (e) {
             return renderError(res, 404, e.message);
         }
@@ -79,7 +94,8 @@ export const postCartDeleteProduct = (req, res, next) => {
     (async () => {
         let product;
         try {
-            product = await Product.findById(productId);
+            const [row, fieldData] = await Product.findById(productId);
+            product = row;
         } catch (e) {
             return renderError(res, 404, e.message);
         }
