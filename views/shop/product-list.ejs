@@ -1,26 +1,26 @@
 <% if (prods.length > 0) { %>
-  <% for (let product of prods) { %>
-    <div class="grid">
-        <article class="card product-item">
-            <header class="card-header">
-              <h1 class="product-title"><%= product.title %></h1>
-            </header>
-            <div class="card-image">
-              <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
-            </div>
-            <div class="card-content">
-              <h2 class="product-price">$<%= product.price %></h2>
-              <p class="product-description"><%= product.description %></p>
-            </div>
-            <div class="card-actions">
-              <form action="/products/<%= product.id %>">
-                <button type="submit" class="btn">Details</button>
-              </form>
-              <%- include('../includes/add-to-cart.ejs', { product }) %>
-            </div>
-        </article>
-    </div>
-  <% } %>
+  <div class="grid">
+    <% for (let product of prods) { %>
+      <article class="card product-item">
+        <header class="card-header">
+          <h1 class="product-title"><%= product.title %></h1>
+        </header>
+        <div class="card-image">
+          <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+        </div>
+        <div class="card-content">
+          <h2 class="product-price">$<%= product.price %></h2>
+          <p class="product-description"><%= product.description %></p>
+        </div>
+        <div class="card-actions">
+          <form action="/products/<%= product.id %>">
+            <button type="submit" class="btn">Details</button>
+          </form>
+          <%- include('../includes/add-to-cart.ejs', { product }) %>
+        </div>
+      </article>
+    <% } %>
+  </div>
 <% } else { %>
   <h1>No Products</h1>
 <% } %>

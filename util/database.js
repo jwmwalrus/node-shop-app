@@ -1,10 +1,8 @@
-import mysql from 'mysql2';
+import { Sequelize } from 'sequelize';
 
-const pool = mysql.createPool({
+const sequelize = new Sequelize('node_complete', 'jmore', '$omebody2LeanOn', {
+    dialect: 'mysql',
     host: '127.0.0.1',
-    user: 'jmore',
-    database: 'node_complete',
-    password: '$omebody2LeanOn',
 });
 
-export default pool.promise();
+export default sequelize;

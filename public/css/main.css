@@ -15,12 +15,30 @@ main {
   margin: auto;
 }
 
+form {
+  display: inline;
+}
+
+.centered {
+  text-align: center;
+}
+
+.image {
+  height: 20rem;
+}
+
+.image img {
+  height: 100%;
+}
+
 .main-header {
   width: 100%;
   height: 3.5rem;
   /* background-color: #dbc441; */
   background-color: #00695c;
   padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
 }
 
 .main-header nav {
@@ -52,10 +70,6 @@ main {
   /* color: #3e00a1; */
   /* color: #ffeb3b; */
   color: lime;
-}
-
-.centered {
-  text-align: center;
 }
 
 .mobile-nav {
@@ -147,7 +161,7 @@ main {
 }
 
 .card-header,
-.card-content {
+.card__content {
   padding: 1rem;
 }
 
@@ -167,16 +181,19 @@ main {
 }
 
 .card-actions {
-    padding: 1rem;
-    text-align: center;
+  padding: 1rem;
+  text-align: center;
 }
 
 .card-actions button,
 .card-actions a {
-    margin: 0 0.25rem;
+  margin: 0 0.25rem;
 }
 
 .btn {
+  display: inline-block;
+  padding: 0.25rem 1rem;
+  text-decoration: none;
   font: inherit;
   border: 1px solid #00695c;
   color: #00695c;
@@ -190,3 +207,25 @@ main {
   background-color: #00695c;
   color: white;
 }
+
+.btn.danger {
+  color: red;
+  border-color: red;
+}
+
+.btn.danger:hover,
+.btn.danger:active {
+  background: red;
+  color: white;
+}
+
+@media (min-width: 768px) {
+  .main-header__nav {
+    display: flex;
+  }
+
+  #side-menu-toggle {
+    display: none;
+  }
+}
+

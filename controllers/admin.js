@@ -6,8 +6,7 @@ export const getProducts = (req, res, next) => {
     (async () => {
         let products;
         try {
-            const [rows, fieldData] = await Product.fetchAll();
-            products = rows;
+            products = await req.user.getProducts();
         } catch (e) {
             console.error(e);
         }
@@ -21,12 +20,14 @@ export const getAddProduct = (req, res, next) => {
 
 export const postAddProduct = (req, res, next) => {
     const { title, imageUrl, description, price } = req.body;
-    const priceVal = parseFloat(price)
-
-    const p = new Product(null, title, imageUrl, description, priceVal);
+    const priceVal = parseFloat(price).toFixed(2);
 
     (async () => {
-        await p.save();
+        try {
+            await req.user.createProduct({ title, imageUrl, description, price: priceVal });
+        } catch (e) {
+            console.error(e);
+        }
         res.redirect('/admin/products');
     })();
 };
@@ -35,8 +36,8 @@ export const getEditProduct = (req, res, next) => {
     (async () => {
         let product;
         try {
-            const [row, fieldData] = await Product.findById(req.params.productId);
-            product = row;
+            const products = await req.user.getProducts({ where: { id: req.params.productId } });
+            product = products[0];
         } catch (e) {
             renderError(res, 404, 'Product Not Found: '+e.message)
             return
@@ -47,12 +48,12 @@ export const getEditProduct = (req, res, next) => {
 
 export const postEditProduct = (req, res, next) => {
     const { id, title, imageUrl, description, price } = req.body;
-    const priceVal = parseFloat(price)
-
-    const p = new Product(id, title, imageUrl, description, priceVal);
+    const priceVal = parseFloat(price);
 
     (async () => {
-        await p.save();
+        await Product.update({title, imageUrl, description, priceVal}, {
+            where: { id },
+        });
         res.redirect('/admin/products');
     })();
 };
@@ -60,7 +61,9 @@ export const postEditProduct = (req, res, next) => {
 export const postDeleteProduct = (req, res, next) => {
     (async () => {
         try {
-            await Product.deleteById(req.params.productId);
+            await Product.destroy({
+                where: { id: req.params.productId },
+            });
         } catch (e) {
             console.error(e);
         }

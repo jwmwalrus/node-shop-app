@@ -1,18 +1,29 @@
 <% if (prods.length > 0) { %>
   <h1><%= pageTitle %></h1>
-  <ul>
-    <% prods.forEach(p => { %>
-      <li>
-        <p><%= p.title %> (<%= p.qty %>)</p>
-        <form action="/cart-delete-item" method="POST">
-          <input type="hidden" value="<%= p.id %>" name="productId">
-          <button class="btn" type="submit">Delete</button>
-        </form>
-      </li>
-    <% }) %>
-  </ul>
+  <div class="cart">
+    <ul>
+      <% prods.forEach(p => { %>
+        <li>
+          <h1><%= p.title %></h1>
+          <h2>Quantity: <%= p.cartItem.quantity %></h2>
+          <form action="/cart-delete-item" method="POST">
+              <input type="hidden" value="<%= p.id %>" name="productId">
+              <button class="btn danger" type="submit">Delete</button>
+          </form>
+        </li>
+      <% }) %>
+    </ul>
+    <hr />
+    <div class="centered">
+      <form action="/create-order" method="POST">
+        <button type="submit" class="btn">Order Now!</button>
+      </form>
+    </div>
+  </div>
 <% } else { %>
   <h1>No Products in Cart!</h1>
 <% } %>
 
 <%- contentFor('styles') %>
+<link rel="stylesheet" href="/css/cart.css">
+<link rel="stylesheet" href="/css/forms.css">
