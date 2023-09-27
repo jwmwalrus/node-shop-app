@@ -1,13 +1,13 @@
 .form-control {
   margin: 1rem 0;
-  display: flex;
 }
 
 .form-control label,
 .form-control input,
 .form-control textarea {
   display: block;
-  margin-right: 0.25rem;
+  /* margin-right: 0.25rem; */
+  width: 100%;
   margin-bottom: 0.25rem;
 }
 

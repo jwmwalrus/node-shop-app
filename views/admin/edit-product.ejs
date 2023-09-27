@@ -2,7 +2,7 @@
 <form class="product-form" action="/admin/edit-product/<%= product.title %>", method="POST">
   <div class="form-control">
     <label for="id">ID</label>
-    <input type="text" name="id" value="<%= product.id %>" readonly>
+    <input type="text" name="id" value="<%= product._id %>" readonly>
   </div>
 <% } else { %>
 <form class="product-form" action="/admin/add-product", method="POST">

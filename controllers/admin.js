@@ -6,7 +6,7 @@ export const getProducts = (req, res, next) => {
     (async () => {
         let products;
         try {
-            products = await req.user.getProducts();
+            products = await Product.fetchAll();
         } catch (e) {
             console.error(e);
         }
@@ -22,9 +22,10 @@ export const postAddProduct = (req, res, next) => {
     const { title, imageUrl, description, price } = req.body;
     const priceVal = parseFloat(price).toFixed(2);
 
+    const product = new Product(null, title, imageUrl, description, priceVal, req.user._id);
     (async () => {
         try {
-            await req.user.createProduct({ title, imageUrl, description, price: priceVal });
+            await product.save();
         } catch (e) {
             console.error(e);
         }
@@ -36,8 +37,8 @@ export const getEditProduct = (req, res, next) => {
     (async () => {
         let product;
         try {
-            const products = await req.user.getProducts({ where: { id: req.params.productId } });
-            product = products[0];
+            product = await Product.findById(req.params.productId);
+            // product = products[0];
         } catch (e) {
             renderError(res, 404, 'Product Not Found: '+e.message)
             return
@@ -50,10 +51,9 @@ export const postEditProduct = (req, res, next) => {
     const { id, title, imageUrl, description, price } = req.body;
     const priceVal = parseFloat(price);
 
+    const product = new Product(id, title, imageUrl, description, priceVal);
     (async () => {
-        await Product.update({title, imageUrl, description, priceVal}, {
-            where: { id },
-        });
+        await product.save();
         res.redirect('/admin/products');
     })();
 };
@@ -61,9 +61,7 @@ export const postEditProduct = (req, res, next) => {
 export const postDeleteProduct = (req, res, next) => {
     (async () => {
         try {
-            await Product.destroy({
-                where: { id: req.params.productId },
-            });
+            await Product.deleteById(req.params.productId);
         } catch (e) {
             console.error(e);
         }

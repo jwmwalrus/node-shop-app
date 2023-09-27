@@ -13,7 +13,7 @@
           <p class="product-description"><%= product.description %></p>
         </div>
         <div class="card-actions">
-          <form action="/products/<%= product.id %>">
+          <form action="/products/<%= product._id %>">
             <button type="submit" class="btn">Details</button>
           </form>
           <%- include('../includes/add-to-cart.ejs', { product }) %>

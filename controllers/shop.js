@@ -1,6 +1,4 @@
 import Product from '../models/product.js';
-import Order from '../models/order.js';
-import sequelize from '../util/database.js';
 
 import { renderError } from './errors.js';
 
@@ -8,7 +6,7 @@ export const getIndex = (req, res, next) => {
     (async () => {
         let products = [];
         try {
-            products = await Product.findAll( { order: sequelize.literal('rand()'), limit: 5 } );
+            products = await Product.fetchSome();
         } catch (e) {
             console.error(e);
         }
@@ -20,7 +18,7 @@ export const getProducts = (req, res, next) => {
     (async () => {
         let products = [];
         try {
-            products = await Product.findAll();
+            products = await Product.fetchAll();
         } catch (e) {
             console.error(e);
         }
@@ -32,7 +30,7 @@ export const getProduct = (req, res, next) => {
     (async () => {
         let product;
         try {
-            product = await Product.findByPk(req.params.productId);
+            product = await Product.findById(req.params.productId);
         } catch (e) {
             renderError(res, 404, e.message);
             return
@@ -46,15 +44,7 @@ export const getCart = (req, res, next) => {
     (async () => {
         const cart = await req.user.getCart();
 
-        let prods = [];
-        try {
-            const products = await Product.findAll();
-            prods = await cart.getProducts();
-        } catch (e) {
-            console.error(e);
-        }
-
-        res.render('shop/cart', { prods, pageTitle: 'Your Cart', path: req.originalUrl });
+        res.render('shop/cart', { prods: cart.items, pageTitle: 'Your Cart', path: req.originalUrl });
     })();
 };
 
@@ -66,23 +56,8 @@ export const postCart = (req, res, next) => {
 
     (async () => {
         try {
-            const cart = await req.user.getCart();
-
-            const products = await cart.getProducts({ where: { id: productId } });
-
-            let product;
-            if (products.length > 0) {
-                product = products[0];
-            }
-
-            let newQuantity = 1;
-            if (product) {
-                newQuantity = product.cartItem.quantity+1;
-            } else {
-                product = await Product.findByPk(productId)
-            }
-
-            await cart.addProduct(product, { through: { quantity: newQuantity }})
+            const product = await Product.findById(productId);
+            await req.user.addToCart(product);
         } catch (e) {
             return renderError(res, 404, e.message);
         }
@@ -99,11 +74,7 @@ export const postCartDeleteProduct = (req, res, next) => {
 
     (async () => {
         try {
-            const cart = await req.user.getCart();
-
-            const products = await cart.getProducts({ where: { id: productId } });
-
-            await products[0].cartItem.destroy();
+            await req.user.removeFromCart(productId);
         } catch (e) {
             return renderError(res, 404, e.message);
         }
@@ -116,7 +87,7 @@ export const getOrders = (req, res, next) => {
     (async () => {
         let orders = [];
         try {
-            orders = await req.user.getOrders({ include: ['products'] });
+            orders = await req.user.getOrders();
         } catch (e) {
             console.error(e);
         }
@@ -127,22 +98,12 @@ export const getOrders = (req, res, next) => {
 export const postOrder = (req, res, next) => {
     (async () => {
         try {
-            const cart = await req.user.getCart();
-            const products = await cart.getProducts();
+            const order = await req.user.addOrder();
 
-            if (products.length == 0) {
+            if (order.items.length == 0) {
                 res.redirect('/cart');
                 return
             }
-
-            const order = await req.user.createOrder();
-
-            await order.addProducts(products.map((product) => {
-                product.orderItem = { quantity: product.cartItem.quantity };
-                return product;
-            }));
-
-            await cart.setProducts(null);
         } catch (e) {
             console.error(e);
         }
