@@ -4,9 +4,9 @@ import { renderError } from './errors.js';
 
 export const getProducts = (req, res, next) => {
     (async () => {
-        let products;
+        let products = [];
         try {
-            products = await Product.fetchAll();
+            products = await Product.find();
         } catch (e) {
             console.error(e);
         }
@@ -22,7 +22,7 @@ export const postAddProduct = (req, res, next) => {
     const { title, imageUrl, description, price } = req.body;
     const priceVal = parseFloat(price).toFixed(2);
 
-    const product = new Product(null, title, imageUrl, description, priceVal, req.user._id);
+    const product = new Product({ title, imageUrl, description, price: priceVal, user: req.user });
     (async () => {
         try {
             await product.save();
@@ -38,7 +38,6 @@ export const getEditProduct = (req, res, next) => {
         let product;
         try {
             product = await Product.findById(req.params.productId);
-            // product = products[0];
         } catch (e) {
             renderError(res, 404, 'Product Not Found: '+e.message)
             return
@@ -51,9 +50,8 @@ export const postEditProduct = (req, res, next) => {
     const { id, title, imageUrl, description, price } = req.body;
     const priceVal = parseFloat(price);
 
-    const product = new Product(id, title, imageUrl, description, priceVal);
     (async () => {
-        await product.save();
+        await Product.updateOne( { _id: id }, { title, imageUrl, description, price: priceVal });
         res.redirect('/admin/products');
     })();
 };
@@ -61,7 +59,7 @@ export const postEditProduct = (req, res, next) => {
 export const postDeleteProduct = (req, res, next) => {
     (async () => {
         try {
-            await Product.deleteById(req.params.productId);
+            await Product.deleteOne({ _id: req.params.productId });
         } catch (e) {
             console.error(e);
         }

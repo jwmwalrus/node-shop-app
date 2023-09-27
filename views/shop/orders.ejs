@@ -4,8 +4,8 @@
       <li>
           <h1>#<%= order._id %></h1>
           <ul class="orders-products">
-              <% order.items.forEach(product => { %>
-              <li><%= product.title %> (<%= product.quantity %>)</li>
+              <% order.items.forEach(item => { %>
+              <li><%= item.product.title %> (<%= item.quantity %>)</li>
               <% }); %>
           </ul>
       </li>

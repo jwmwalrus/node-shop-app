@@ -1,4 +1,5 @@
 import Product from '../models/product.js';
+import Order from '../models/order.js';
 
 import { renderError } from './errors.js';
 
@@ -6,7 +7,7 @@ export const getIndex = (req, res, next) => {
     (async () => {
         let products = [];
         try {
-            products = await Product.fetchSome();
+            products = await Product.find();
         } catch (e) {
             console.error(e);
         }
@@ -18,7 +19,7 @@ export const getProducts = (req, res, next) => {
     (async () => {
         let products = [];
         try {
-            products = await Product.fetchAll();
+            products = await Product.find();
         } catch (e) {
             console.error(e);
         }
@@ -42,9 +43,10 @@ export const getProduct = (req, res, next) => {
 
 export const getCart = (req, res, next) => {
     (async () => {
-        const cart = await req.user.getCart();
+        const user = await req.user.populate({ path: 'cart.items.product' });
+        console.log({items: user.cart.items})
 
-        res.render('shop/cart', { prods: cart.items, pageTitle: 'Your Cart', path: req.originalUrl });
+        res.render('shop/cart', { prods: user.cart.items, pageTitle: 'Your Cart', path: req.originalUrl });
     })();
 };
 
@@ -87,7 +89,7 @@ export const getOrders = (req, res, next) => {
     (async () => {
         let orders = [];
         try {
-            orders = await req.user.getOrders();
+            orders = await Order.find({ user: req.user });
         } catch (e) {
             console.error(e);
         }
@@ -98,12 +100,18 @@ export const getOrders = (req, res, next) => {
 export const postOrder = (req, res, next) => {
     (async () => {
         try {
-            const order = await req.user.addOrder();
+            const user = await req.user.populate('cart.items.product');
+            const order = new Order({items: user.cart.items, user: req.user});
 
             if (order.items.length == 0) {
                 res.redirect('/cart');
                 return
             }
+
+            await order.save();
+
+            req.user.cart = { items: [] };
+            await req.user.save();
         } catch (e) {
             console.error(e);
         }
