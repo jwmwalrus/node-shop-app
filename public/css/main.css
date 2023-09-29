@@ -34,7 +34,6 @@ form {
 .main-header {
   width: 100%;
   height: 3.5rem;
-  /* background-color: #dbc441; */
   background-color: #00695c;
   padding: 0 1.5rem;
   display: flex;
@@ -43,8 +42,10 @@ form {
 
 .main-header nav {
   height: 100%;
+  width: 100%;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .main-header ul {
@@ -59,16 +60,21 @@ form {
   padding: 0;
 }
 
-.main-header li a {
+.main-header li a,
+.main-header li button {
+  font: inherit;
+  background: transparent;
+  border: none;
   text-decoration: none;
   color: white;
+  cursor: pointer;
 }
 
 .main-header li a:hover,
 .main-header li a:active,
-.main-header li a.active {
-  /* color: #3e00a1; */
-  /* color: #ffeb3b; */
+.main-header li a.active,
+.main-header li button:hover,
+.main-header li button:active {
   color: lime;
 }
 

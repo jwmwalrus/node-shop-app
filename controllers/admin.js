@@ -10,12 +10,12 @@ export const getProducts = (req, res, next) => {
         } catch (e) {
             console.error(e);
         }
-        res.render('admin/products', { prods: products, pageTitle: 'Products', path: req.originalUrl });
+        res.render('admin/products', { prods: products, pageTitle: 'Products' });
     })();
 };
 
 export const getAddProduct = (req, res, next) => {
-    res.render('admin/edit-product', { product: {},  pageTitle: 'Add Product', path: req.originalUrl, editing: false });
+    res.render('admin/edit-product', { product: {},  pageTitle: 'Add Product', editing: false });
 };
 
 export const postAddProduct = (req, res, next) => {
@@ -42,7 +42,7 @@ export const getEditProduct = (req, res, next) => {
             renderError(res, 404, 'Product Not Found: '+e.message)
             return
         }
-        res.render('admin/edit-product', { product, pageTitle: product.title, path: req.originalUrl, editing: true });
+        res.render('admin/edit-product', { product, pageTitle: product.title, editing: true });
     })();
 };
 

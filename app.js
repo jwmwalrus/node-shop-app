@@ -35,12 +35,12 @@ app.use((req, res, next) => {
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
+app.use(authRoutes);
 
 app.use(errorHandler({code: 404, pageTitle: 'Page Not Found'}));
 
-
 try {
-    const client = await connect(dbUrl);
+    const client = await connect(MONGODB_URI);
     let user = await User.findOne({ email: 'jwm@localhost' });
     if (user == null) {
         user = new User({ name: 'John M', email: 'jwm@localhost', cart: { items: [] } });

@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title><%= pageTitle %></title>
   <link rel="stylesheet" href="/css/main.css">
   <script src="/js/main.js" defer></script>
@@ -14,23 +16,38 @@
     <nav>
       <ul>
         <li>
-          <a href="/" class="<%= path === '/' ? 'active' : '' %>">Shop</a>
+          <a href="/" class="<%= originalUrl === '/' ? 'active' : '' %>">Shop</a>
         </li>
         <li>
-          <a href="/products" class="<%= path === '/products' ? 'active' : '' %>">Products</a>
+          <a href="/products" class="<%= originalUrl === '/products' ? 'active' : '' %>">Products</a>
         </li>
+        <% if (isAuthenticated) { %>
+          <li>
+            <a href="/cart" class="<%= originalUrl === '/cart' ? 'active' : '' %>">Cart</a>
+          </li>
+          <li>
+            <a href="/orders" class="<%= originalUrl === '/orders' ? 'active' : '' %>">Orders</a>
+          </li>
+          <li>
+            <a href="/admin/add-product" class="<%= originalUrl === '/admin/add-product' ? 'active' : '' %>">Add Product</a>
+          </li>
+          <li>
+            <a href="/admin/products" class="<%= originalUrl === '/admin/products' ? 'active' : '' %>">Admin Product</a>
+          </li>
+        <% } %>
+      </ul>
+      <ul>
+        <% if (!isAuthenticated) { %>
         <li>
-          <a href="/cart" class="<%= path === '/cart' ? 'active' : '' %>">Cart</a>
+          <a href="/login" class="<%= originalUrl === '/login' ? 'active' : '' %>">Login</a>
         </li>
+        <% } else { %>
         <li>
-          <a href="/orders" class="<%= path === '/orders' ? 'active' : '' %>">Orders</a>
+          <form action="/logout" method="POST">
+            <button type="submit">Logout</button>
+          </form>
         </li>
-        <li>
-          <a href="/admin/add-product" class="<%= path === '/admin/add-product' ? 'active' : '' %>">Add Product</a>
-        </li>
-        <li>
-          <a href="/admin/products" class="<%= path === '/admin/products' ? 'active' : '' %>">Admin Product</a>
-        </li>
+        <% } %>
       </ul>
     </nav>
   </header>
@@ -38,25 +55,38 @@
   <nav class="mobile-nav">
     <ul>
       <li>
-        <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
+        <a class="<%= originalUrl === '/' ? 'active' : '' %>" href="/">Shop</a>
       </li>
       <li>
-        <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">Products</a>
+        <a class="<%= originalUrl === '/products' ? 'active' : '' %>" href="/products">Products</a>
       </li>
+      <% if (isAuthenticated) { %>
+        <li>
+          <a class="<%= originalUrl === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
+        </li>
+        <li>
+          <a class="<%= originalUrl === '/orders' ? 'active' : '' %>" href="/orders">Orders</a>
+        </li>
+        <li>
+          <a class="<%= originalUrl === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">Add Product</a>
+        </li>
+        <li>
+          <a class="<%= originalUrl === '/admin/products' ? 'active' : '' %>" href="/admin/products">Admin Products</a>
+        </li>
+      <% } %>
+    </ul>
+    <ul>
+      <% if (!isAuthenticated) { %>
       <li>
-        <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
+        <a href="/login" class="<%= originalUrl === '/login' ? 'active' : '' %>">Login</a>
       </li>
+      <% } else { %>
       <li>
-        <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">Orders</a>
+        <form action="/logout" method="POST">
+          <button type="submit">Logout</button>
+        </form>
       </li>
-      <li>
-        <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">Add Product
-        </a>
-      </li>
-      <li>
-        <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">Admin Products
-        </a>
-      </li>
+      <% } %>
     </ul>
   </nav>
 

@@ -44,7 +44,6 @@ export const getProduct = (req, res, next) => {
 export const getCart = (req, res, next) => {
     (async () => {
         const user = await req.user.populate({ path: 'cart.items.product' });
-        console.log({items: user.cart.items})
 
         res.render('shop/cart', { prods: user.cart.items, pageTitle: 'Your Cart', path: req.originalUrl });
     })();

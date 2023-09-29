@@ -6,7 +6,6 @@
 .form-control input,
 .form-control textarea {
   display: block;
-  /* margin-right: 0.25rem; */
   width: 100%;
   margin-bottom: 0.25rem;
 }
@@ -17,7 +16,7 @@
   border: 1px solid #a1a1a1;
   font: inherit;
   border-radius: 2px;
-  flex-grow: 1;
+  /* flex-grow: 1; */
 }
 
 .form-control input:focus,
