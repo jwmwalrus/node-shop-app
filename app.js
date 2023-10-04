@@ -1,17 +1,28 @@
 import { resolve } from 'path';
 
+import 'dotenv/config';
 import express from 'express';
 import expressEjsLayouts from 'express-ejs-layouts';
 import { connect } from 'mongoose';
+import ConnectMongoDb from 'connect-mongodb-session';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import csurf from 'tiny-csrf';
+import flash from 'flash';
 
 import adminRoutes from './routes/admin.js';
 import shopRoutes from './routes/shop.js';
+import authRoutes from './routes/auth.js';
 import { errorHandler } from './controllers/errors.js';
 import User from './models/user.js';
 
-const dbUrl = 'mongodb://localhost:27017/shop?retryWrites=true&w=majority';
+const MongoDbStore = ConnectMongoDb(session);
 
 const app = express();
+const store = new MongoDbStore({
+    uri: process.env.MONGODB_URI,
+    collection: 'sessions',
+});
 
 app.use(expressEjsLayouts)
 app.set('view engine', 'ejs');
@@ -20,12 +31,32 @@ app.set('layout', './layouts/main-layout')
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(resolve('public')));
+app.use(cookieParser("cookie-parser-secret"));
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store,
+}));
+app.use(csurf(process.env.CSRF_SECRET));
+app.use(flash());
+
+// middleware to make some variables available to all templates
+app.use((req, res, next) => {
+    const csrf = req.csrfToken ? req.csrfToken() : '';
+    res.locals.originalUrl = req.originalUrl;
+    res.locals.isAuthenticated = req.session.isAuthenticated ? true : false;
+    res.locals.csrfToken = req.csrfToken ? req.csrfToken() : '';
+    next();
+});
 
 app.use((req, res, next) => {
     (async () => {
         try {
-            const user = await User.findOne({ email: 'jwm@localhost' });
-            req.user = user;
+            if (req.session && req.session.user) {
+                const user = await User.findById(req.session.user._id);
+                req.user = user;
+            }
             next();
         } catch (e) {
             console.error(e);
@@ -40,12 +71,7 @@ app.use(authRoutes);
 app.use(errorHandler({code: 404, pageTitle: 'Page Not Found'}));
 
 try {
-    const client = await connect(MONGODB_URI);
-    let user = await User.findOne({ email: 'jwm@localhost' });
-    if (user == null) {
-        user = new User({ name: 'John M', email: 'jwm@localhost', cart: { items: [] } });
-        await user.save();
-    }
+    const client = await connect(process.env.MONGODB_URI);
     app.listen(3000);
 } catch (e) {
     console.error(e);

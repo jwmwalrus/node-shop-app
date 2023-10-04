@@ -24,6 +24,7 @@
     <textarea rows="5" name="description"><%= product.description %></textarea>
   </div>
   <button type="submit" class="btn"><%= editing ? 'Update': 'Add' %> Product</button>
+  <%- include('../includes/csrf-token.ejs') %>
 </form>
 
 <%- contentFor('styles') %>

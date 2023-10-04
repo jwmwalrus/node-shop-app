@@ -11,7 +11,7 @@ export const getIndex = (req, res, next) => {
         } catch (e) {
             console.error(e);
         }
-        res.render('shop/index', { prods: products, pageTitle: 'Index', path: req.originalUrl });
+        res.render('shop/index', { prods: products, pageTitle: 'Index' });
     })();
 };
 
@@ -23,7 +23,7 @@ export const getProducts = (req, res, next) => {
         } catch (e) {
             console.error(e);
         }
-        res.render('shop/product-list', { prods: products, pageTitle: 'Shop', path: req.originalUrl });
+        res.render('shop/product-list', { prods: products, pageTitle: 'Shop' });
     })();
 };
 
@@ -37,7 +37,7 @@ export const getProduct = (req, res, next) => {
             return
         }
 
-        res.render('shop/product-detail', { product: product, pageTitle: product.title, path: '/products' });
+        res.render('shop/product-detail', { product: product, pageTitle: product.title });
     })();
 };
 
@@ -45,7 +45,7 @@ export const getCart = (req, res, next) => {
     (async () => {
         const user = await req.user.populate({ path: 'cart.items.product' });
 
-        res.render('shop/cart', { prods: user.cart.items, pageTitle: 'Your Cart', path: req.originalUrl });
+        res.render('shop/cart', { prods: user.cart.items, pageTitle: 'Your Cart' });
     })();
 };
 
@@ -92,7 +92,7 @@ export const getOrders = (req, res, next) => {
         } catch (e) {
             console.error(e);
         }
-        res.render('shop/orders', { orders, pageTitle: 'Orders', path: req.originalUrl });
+        res.render('shop/orders', { orders, pageTitle: 'Orders' });
     })();
 };
 
@@ -120,6 +120,6 @@ export const postOrder = (req, res, next) => {
 };
 
 export const getCheckout = (req, res, next) => {
-    res.render('shop/checkout', { pageTitle: 'Checkout', path: req.originalUrl });
+    res.render('shop/checkout', { pageTitle: 'Checkout' });
 };
 

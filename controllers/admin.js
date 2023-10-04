@@ -6,7 +6,7 @@ export const getProducts = (req, res, next) => {
     (async () => {
         let products = [];
         try {
-            products = await Product.find();
+            products = await Product.find({ user: req.user });
         } catch (e) {
             console.error(e);
         }
@@ -37,7 +37,11 @@ export const getEditProduct = (req, res, next) => {
     (async () => {
         let product;
         try {
-            product = await Product.findById(req.params.productId);
+            product = await Product.findOne({_id: req.params.productId, user: req.user });
+            if (product == null) {
+                req.flash('error', 'Product not found');
+                return res.redirect('/admin/products');
+            }
         } catch (e) {
             renderError(res, 404, 'Product Not Found: '+e.message)
             return
@@ -51,15 +55,30 @@ export const postEditProduct = (req, res, next) => {
     const priceVal = parseFloat(price);
 
     (async () => {
-        await Product.updateOne( { _id: id }, { title, imageUrl, description, price: priceVal });
-        res.redirect('/admin/products');
+        try {
+            const product = await Product.findOne({_id: id, user: req.user });
+            if (product == null) {
+                req.flash('error', 'Product not found');
+                return res.redirect('/admin/products');
+            }
+
+            product.title = title;
+            product.imageUrl = imageUrl;
+            product.description = description;
+            product.price = priceVal;
+            await product.save();
+
+            res.redirect('/admin/products');
+        } catch (e) {
+            console.error(e);
+        }
     })();
 };
 
 export const postDeleteProduct = (req, res, next) => {
     (async () => {
         try {
-            await Product.deleteOne({ _id: req.params.productId });
+            await Product.deleteOne({ _id: req.params.productId, user: req.user });
         } catch (e) {
             console.error(e);
         }

@@ -17,6 +17,7 @@
     <div class="centered">
       <form action="/create-order" method="POST">
         <button type="submit" class="btn">Order Now!</button>
+        <%- include('../includes/csrf-token.ejs') %>
       </form>
     </div>
   </div>
