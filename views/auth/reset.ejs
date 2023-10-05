@@ -3,7 +3,7 @@
     <label for="email">E-Mail</label>
     <% { %>
       <% const err = locals.errors?.find(e => e.path === 'email'); %>
-      <input type="email" name="email" class="<%= err ? 'invalid' : ''%>" value="<%= input.email ?? '' %>" required>
+      <input type="email" id="email" name="email" class="<%= err ? 'invalid' : ''%>" value="<%= input.email ?? '' %>" required>
       <% if (err) { %>
         <p class="error"><%= err.msg %> </p>
       <% } %>

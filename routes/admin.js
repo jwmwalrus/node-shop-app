@@ -32,9 +32,17 @@ const router = express.Router();
 
 router.get('/products', isAuth, getProducts);
 router.get('/add-product', isAuth,  getAddProduct);
-router.post('/add-product', [titleValidator, imageUrlValidator, priceValidator, descriptionValidator], isAuth, postAddProduct);
+router.post('/add-product',
+    [titleValidator, imageUrlValidator, priceValidator, descriptionValidator],
+    isAuth,
+    postAddProduct,
+);
 router.get('/edit-product/:productId', isAuth, getEditProduct);
-router.post('/edit-product/:productId', [titleValidator, imageUrlValidator, priceValidator, descriptionValidator], isAuth, postEditProduct);
+router.post('/edit-product/:productId',
+    [titleValidator, imageUrlValidator, priceValidator, descriptionValidator],
+    isAuth,
+    postEditProduct,
+);
 router.post('/delete-product/:productId', isAuth, postDeleteProduct);
 
 export default router;

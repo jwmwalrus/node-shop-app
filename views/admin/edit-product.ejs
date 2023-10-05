@@ -11,7 +11,7 @@
     <label for="title">Title</label>
     <% { %>
       <% const err = locals.errors?.find(e => e.path === 'title'); %>
-      <input type="text" name="title" class="<%= err ? 'invalid' : ''%>" value="<%= product.title %>" required>
+      <input type="text" id="title" name="title" class="<%= err ? 'invalid' : ''%>" value="<%= product.title %>" required>
       <% if (err) { %>
         <p class="error"><%= err.msg %> </p>
       <% } %>
@@ -21,7 +21,7 @@
     <label for="imageUrl">image URL</label>
     <% { %>
       <% const err = locals.errors?.find(e => e.path === 'imageUrl'); %>
-      <input type="text" name="imageUrl" class="<%= err ? 'invalid' : ''%>" value="<%= product.imageUrl %>">
+      <input type="text" id="imageUrl" name="imageUrl" class="<%= err ? 'invalid' : ''%>" value="<%= product.imageUrl %>">
       <% if (err) { %>
         <p class="error"><%= err.msg %> </p>
       <% } %>
@@ -31,7 +31,7 @@
     <label for="price">Price</label>
     <% { %>
       <% const err = locals.errors?.find(e => e.path === 'price'); %>
-      <input type="number" step="0.01" name="price" class="<%= err ? 'invalid' : ''%>" value="<%= product.price %>" required>
+      <input type="number" step="0.01" id="price" name="price" class="<%= err ? 'invalid' : ''%>" value="<%= product.price %>" required>
       <% if (err) { %>
         <p class="error"><%= err.msg %> </p>
       <% } %>
@@ -41,7 +41,7 @@
     <label for="description">Description</label>
     <% { %>
       <% const err = locals.errors?.find(e => e.path === 'description'); %>
-      <textarea rows="5" name="description" class="<%= err ? 'invalid' : ''%>"><%= product.description %></textarea>
+      <textarea rows="5" id="description" name="description" class="<%= err ? 'invalid' : ''%>"><%= product.description %></textarea>
       <% if (err) { %>
         <p class="error"><%= err.msg %> </p>
       <% } %>

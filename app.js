@@ -13,7 +13,7 @@ import flash from 'flash';
 import adminRoutes from './routes/admin.js';
 import shopRoutes from './routes/shop.js';
 import authRoutes from './routes/auth.js';
-import { errorHandler } from './controllers/errors.js';
+import { AppError, renderError } from './middleware/errors.js';
 import User from './models/user.js';
 
 const MongoDbStore = ConnectMongoDb(session);
@@ -55,6 +55,10 @@ app.use((req, res, next) => {
         try {
             if (req.session && req.session.user) {
                 const user = await User.findById(req.session.user._id);
+                if (!user) {
+                    throw new Error("No user exists for the given session");
+                }
+
                 req.user = user;
             }
             next();
@@ -68,7 +72,15 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
-app.use(errorHandler({code: 404, pageTitle: 'Page Not Found'}));
+app.use((req, res, next) => renderError(res, 'Page Not Found', 404));
+app.use((error, req, res, next) => {
+    if (error.render) {
+        return error.render(res);
+    }
+
+    const e = new AppError('Error', { cause: error });
+    e.render(res);
+});
 
 try {
     await connect(process.env.MONGODB_URI);

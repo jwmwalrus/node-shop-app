@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import { validationResult } from 'express-validator';
 
 import User from '../models/user.js';
+import { AppError } from '../middleware/errors.js';
 
 let transporter = nodemailer.createTransport({
    host: 'smtp.sendgrid.net',
@@ -15,14 +16,18 @@ let transporter = nodemailer.createTransport({
    }
 })
 
-export const getLogin = (req, res, next) => {
+export const getLogin = (req, res) => {
     res.render('auth/login', { pageTitle: 'Login', input: {} });
 };
 
 export const postLogin = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).render('auth/login', { pageTitle: 'Login', input: { ...req.body }, errors: errors.array() });
+        return res.status(422).render('auth/login', {
+            pageTitle: 'Login',
+            input: { ...req.body },
+            errors: errors.array(),
+        });
     }
 
     (async () => {
@@ -32,13 +37,19 @@ export const postLogin = (req, res, next) => {
             const user = await User.findOne({ email });
             if (user == null) {
                 req.flash('error', 'Invalid email or password');
-                return res.status(422).render('auth/login', { pageTitle: 'Login', input: { ...req.body } });
+                return res.status(422).render('auth/login', {
+                    pageTitle: 'Login',
+                    input: { ...req.body },
+                });
             }
 
             const matches = await bcrypt.compare(password, user.password);
             if (!matches) {
                 req.flash('error', 'Invalid email or password');
-                return res.status(422).render('auth/login', { pageTitle: 'Login', input: { ...req.body } });
+                return res.status(422).render('auth/login', {
+                    pageTitle: 'Login',
+                    input: { ...req.body },
+                });
             }
 
             req.session.isAuthenticated = true;
@@ -47,34 +58,43 @@ export const postLogin = (req, res, next) => {
                 res.redirect('/');
             });
         } catch (e) {
-            console.error(e);
+            next(new AppError('Failed to login', { cause: e }), req, res);
         }
     })();
 };
 
-export const postLogout = (req, res, next) => {
+export const postLogout = (req, res) => {
     req.session.destroy(() => {
         res.redirect('/');
     });
 };
 
-export const getSignup = (req, res, next) => {
+export const getSignup = (req, res) => {
     res.render('auth/signup', { pageTitle: 'Signup', input: {} });
 };
 
 export const postSignup = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).render('auth/signup', { pageTitle: 'Signup', input: { ...req.body }, errors: errors.array() });
+        return res.status(422).render('auth/signup', {
+            pageTitle: 'Signup',
+            input: { ...req.body },
+            errors: errors.array(),
+        });
     }
 
     (async () => {
         try {
-            const { name, email, password, confirmPasswird } = req.body;
+            const { name, email, password } = req.body;
 
             const hashed = await bcrypt.hash(password, 12);
 
-            const user = new User({ name, email, password: hashed, cart: { items: [] } });
+            const user = new User({
+                name,
+                email,
+                password: hashed,
+                cart: { items: [] },
+            });
             await user.save();
 
             res.redirect('/login');
@@ -87,19 +107,23 @@ export const postSignup = (req, res, next) => {
             });
             console.info({msgInfo});
         } catch (e) {
-            console.error(e);
+            next(new AppError('Failed to signup', { cause: e }), req, res);
         }
     })();
 };
 
-export const getReset = (req, res, next) => {
+export const getReset = (req, res) => {
     res.render('auth/reset', { pageTitle: 'Reset Password', input: {} });
 };
 
 export const postReset = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).render('auth/reset', { pageTitle: 'Reset Password', input: { ...req.body }, errors: errors.array() });
+        return res.status(422).render('auth/reset', {
+            pageTitle: 'Reset Password',
+            input: { ...req.body },
+            errors: errors.array(),
+        });
     }
 
     (async () => {
@@ -109,14 +133,17 @@ export const postReset = (req, res, next) => {
             const user = await User.findOne({ email });
             if (user == null) {
                 req.flash('error', 'No account was found for that email');
-                return res.status(422).render('auth/reset', { pageTitle: 'Reset Password', input: { ...req.body } });
+                return res.status(422).render('auth/reset', {
+                    pageTitle: 'Reset Password',
+                    input: { ...req.body },
+                });
             }
 
             let buffer;
             try {
                 buffer = randomBytes(32);
             } catch (e) {
-                console.error(e);
+                return next(new AppError('Failed to create reset key', { cause: e }), req, res);
             }
 
             user.resetToken = buffer.toString('hex');
@@ -137,42 +164,62 @@ export const postReset = (req, res, next) => {
             });
             console.info({msgInfo});
         } catch (e) {
-            console.error(e);
+            next(new AppError('Failed to reset password', { cause: e }), req, res);
         }
     })();
 };
 
-export const getNewPassword = (req, res, next) => {
+export const getNewPassword = (req, res) => {
     (async () => {
         try {
             const { token } = req.params;
 
-            const user = await User.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() }});
+            const user = await User.findOne({
+                resetToken: token,
+                resetTokenExpiration: { $gt: Date.now() },
+            });
+
             if (user == null) {
                 req.flash('error', 'Invalid user or reset token already expired');
                 return res.redirect('/reset');
             }
 
-            res.render('auth/new-password', { pageTitle: 'New Password', token, userId: user._id.toString(), input: {} });
+            res.render('auth/new-password', {
+                pageTitle: 'New Password',
+                token,
+                userId: user._id.toString(),
+                input: {},
+            });
         } catch (e) {
-            console.error(e);
+            next(new AppError('Failed to render reset-password page', { cause: e }), req, res);
         }
     })();
 };
 
-export const postNewPassword = (req, res, next) => {
+export const postNewPassword = (req, res) => {
     const { token, userId } = req.body;
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).render('auth/new-password', { pageTitle: 'New Password', token, userId, input: { ...req.body }, errors: errors.array() });
+        return res.status(422).render('auth/new-password', {
+            pageTitle: 'New Password',
+            token,
+            userId,
+            input: { ...req.body },
+            errors: errors.array(),
+        });
     }
 
     (async () => {
         try {
-            const { password, confirmPassword } = req.body;
+            const { password } = req.body;
 
-            const user = await User.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() }, _id: userId });
+            const user = await User.findOne({
+                resetToken: token,
+                resetTokenExpiration: { $gt: Date.now() },
+                _id: userId,
+            });
+
             if (user == null) {
                 req.flash('error', 'Invalid user or reset token already expired');
                 return res.redirect(`/reset/${token}`);
@@ -187,7 +234,7 @@ export const postNewPassword = (req, res, next) => {
 
             res.redirect('/login');
         } catch (e) {
-            console.error(e);
+            next(new AppError('Failed to reset password', { cause: e }), req, res);
         }
     })();
 };

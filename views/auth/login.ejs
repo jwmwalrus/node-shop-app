@@ -3,7 +3,7 @@
     <label for="email">E-Mail</label>
     <% { %>
       <% const err = locals.errors?.find(e => e.path === 'email'); %>
-      <input type="email" name="email" class="<%= err ? 'invalid' : ''%>" value="<%= input.email ?? '' %>" required>
+      <input type="email" id="email" name="email" class="<%= err ? 'invalid' : ''%>" value="<%= input.email ?? '' %>" required>
       <% if (err) { %>
         <p class="error"><%= err.msg %> </p>
       <% } %>
@@ -11,7 +11,7 @@
   </div>
   <div class="form-control">
     <label for="password">Password</label>
-    <input type="password" name="password" value="<%= input.password ?? '' %>" required>
+    <input type="password" id="password" name="password" value="<%= input.password ?? '' %>" required>
   </div>
   <button type="submit" class="btn">Login</button>
   <%- include('../includes/csrf-token.ejs') %>

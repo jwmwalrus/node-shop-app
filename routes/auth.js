@@ -66,10 +66,19 @@ router.get('/login', getLogin);
 router.post('/login', [emailValidator], postLogin);
 router.post('/logout', postLogout);
 router.get('/signup', getSignup);
-router.post('/signup', [nameValidator, emailValidator, newEmailValidator, passwordValidator, confirmPasswordValidator], postSignup);
+router.post('/signup',
+    [nameValidator, emailValidator, newEmailValidator, passwordValidator, confirmPasswordValidator],
+    postSignup,
+);
 router.get('/reset', getReset);
-router.post('/reset', [emailValidator, existingEmailValidator], postReset);
+router.post('/reset',
+    [emailValidator, existingEmailValidator],
+    postReset,
+);
 router.get('/reset/:token', getNewPassword);
-router.post('/new-password', [passwordValidator, confirmPasswordValidator], postNewPassword);
+router.post('/new-password',
+    [passwordValidator, confirmPasswordValidator],
+    postNewPassword,
+);
 
 export default router;
