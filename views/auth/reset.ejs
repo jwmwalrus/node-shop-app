@@ -1,7 +1,13 @@
-<form class="login-form" action="/reset" method="POST">
+<form class="login-form" action="/reset" method="POST" novalidate>
   <div class="form-control">
     <label for="email">E-Mail</label>
-    <input type="email" name="email" required>
+    <% { %>
+      <% const err = locals.errors?.find(e => e.path === 'email'); %>
+      <input type="email" name="email" class="<%= err ? 'invalid' : ''%>" value="<%= input.email ?? '' %>" required>
+      <% if (err) { %>
+        <p class="error"><%= err.msg %> </p>
+      <% } %>
+    <% } %>
   </div>
   <button type="submit" class="btn">Reset Password</button>
   <%- include('../includes/csrf-token.ejs') %>

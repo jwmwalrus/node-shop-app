@@ -1,19 +1,43 @@
-<form class="login-form" action="/signup" method="POST">
+<form class="login-form" action="/signup" method="POST" novalidate>
   <div class="form-control">
     <label for="name">Name</label>
-    <input type="name" name="name" id="name" required>
+    <% { %>
+      <% const err = locals.errors?.find(e => e.path === 'name'); %>
+      <input type="name" name="name" class="<%= err ? 'invalid' : ''%>" value="<%= input.name ?? '' %>" required>
+      <% if (err) { %>
+        <p class="error"><%= err.msg %> </p>
+      <% } %>
+    <% } %>
   </div>
   <div class="form-control">
     <label for="email">E-Mail</label>
-    <input type="email" name="email" id="email" required>
+    <% { %>
+      <% const err = locals.errors?.find(e => e.path === 'email'); %>
+      <input type="email" name="email" class="<%= err ? 'invalid' : ''%>" value="<%= input.email ?? '' %>" required>
+      <% if (err) { %>
+        <p class="error"><%= err.msg %> </p>
+      <% } %>
+    <% } %>
   </div>
   <div class="form-control">
     <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
+    <% { %>
+      <% const err = locals.errors?.find(e => e.path === 'password'); %>
+      <input type="password" name="password" class="<%= err ? 'invalid' : ''%>" value="<%= input.password ?? '' %>" required>
+      <% if (err) { %>
+        <p class="error"><%= err.msg %> </p>
+      <% } %>
+    <% } %>
   </div>
   <div class="form-control">
     <label for="confirmPassword">Confirm Password</label>
-    <input type="password" name="confirmPassword" id="confirmPassword" required>
+    <% { %>
+      <% const err = locals.errors?.find(e => e.path === 'confirmPassword'); %>
+      <input type="password" name="confirmPassword" class="<%= err ? 'invalid' : ''%>" value="<%= input.confirmPassword ?? '' %>" required>
+      <% if (err) { %>
+        <p class="error"><%= err.msg %> </p>
+      <% } %>
+    <% } %>
   </div>
   <button class="btn" type="submit">Signup</button>
   <%- include('../includes/csrf-token.ejs') %>

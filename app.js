@@ -38,12 +38,12 @@ app.use(session({
     saveUninitialized: false,
     store,
 }));
+
 app.use(csurf(process.env.CSRF_SECRET));
 app.use(flash());
 
 // middleware to make some variables available to all templates
 app.use((req, res, next) => {
-    const csrf = req.csrfToken ? req.csrfToken() : '';
     res.locals.originalUrl = req.originalUrl;
     res.locals.isAuthenticated = req.session.isAuthenticated ? true : false;
     res.locals.csrfToken = req.csrfToken ? req.csrfToken() : '';
@@ -71,7 +71,7 @@ app.use(authRoutes);
 app.use(errorHandler({code: 404, pageTitle: 'Page Not Found'}));
 
 try {
-    const client = await connect(process.env.MONGODB_URI);
+    await connect(process.env.MONGODB_URI);
     app.listen(3000);
 } catch (e) {
     console.error(e);
