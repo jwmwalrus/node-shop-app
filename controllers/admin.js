@@ -9,17 +9,27 @@ export const getProducts = (req, res, next) => {
         try {
             products = await Product.find({ user: req.user });
         } catch (e) {
-            return next(new AppError('Failed to get products', { cause: e }), req, res);
+            return next(
+                new AppError('Failed to get products', { cause: e }),
+                req,
+                res,
+            );
         }
 
-        res.render('admin/products', { prods: products, pageTitle: 'Products' });
+        res.render('admin/products', {
+            prods: products,
+            pageTitle: 'Products',
+        });
     })();
 };
 
 export const getAddProduct = (req, res) => {
-    res.render('admin/edit-product',
-        { product: {},  pageTitle: 'Add Product', editing: false, input: {} },
-    );
+    res.render('admin/edit-product', {
+        product: {},
+        pageTitle: 'Add Product',
+        editing: false,
+        input: {},
+    });
 };
 
 export const postAddProduct = (req, res, next) => {
@@ -39,7 +49,7 @@ export const postAddProduct = (req, res, next) => {
             let { imageUrl } = req.body;
             const priceVal = parseFloat(price).toFixed(2);
 
-            if (imageUrl == '//dummy.png') {
+            if (imageUrl === '//dummy.png') {
                 imageUrl = '/dummy.png';
             }
 
@@ -72,7 +82,11 @@ export const getEditProduct = (req, res, next) => {
                 return res.redirect('/admin/products');
             }
         } catch (e) {
-            return next(new AppError('Product Not Found', { code: 404, cause: e }), req, res);
+            return next(
+                new AppError('Product Not Found', { code: 404, cause: e }),
+                req,
+                res,
+            );
         }
 
         res.render('admin/edit-product', {
@@ -103,11 +117,11 @@ export const postEditProduct = (req, res, next) => {
             let { imageUrl } = req.body;
             const priceVal = parseFloat(price);
 
-            if (imageUrl == '//dummy.png') {
+            if (imageUrl === '//dummy.png') {
                 imageUrl = '/dummy.png';
             }
 
-            const product = await Product.findOne({_id: id, user: req.user });
+            const product = await Product.findOne({ _id: id, user: req.user });
             if (product == null) {
                 req.flash('error', 'Product not found');
                 return res.redirect('/admin/products');
@@ -121,7 +135,11 @@ export const postEditProduct = (req, res, next) => {
 
             res.redirect('/admin/products');
         } catch (e) {
-            next(new AppError('Failed to update product', { cause: e }), req, res);
+            next(
+                new AppError('Failed to update product', { cause: e }),
+                req,
+                res,
+            );
         }
     })();
 };
@@ -134,7 +152,11 @@ export const postDeleteProduct = (req, res, next) => {
                 user: req.user,
             });
         } catch (e) {
-            return next(new AppError('Failed to delete product', { cause: e }), req, res);
+            return next(
+                new AppError('Failed to delete product', { cause: e }),
+                req,
+                res,
+            );
         }
 
         res.redirect('/admin/products');

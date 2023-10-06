@@ -15,37 +15,41 @@ import {
     postNewPassword,
 } from '../controllers/auth.js';
 
-const nameValidator = check('name', 'At least two characters are required for the name')
+const nameValidator = check(
+    'name',
+    'At least two characters are required for the name',
+)
     .notEmpty()
     .isLength({ min: 2 })
     .trim();
 
 const emailValidator = check('email')
-    .isEmail({ require_tld:false })
+    .isEmail({ require_tld: false })
     .withMessage('Please enter a valid email address')
     .normalizeEmail();
 
-const existingEmailValidator = check('email')
-    .custom(async (value) => {
-        const user = await User.findOne({ email: value });
-        if (!user) {
-            throw new Error('No user exists with the provided E-Mail');
-        }
+const existingEmailValidator = check('email').custom(async (value) => {
+    const user = await User.findOne({ email: value });
+    if (!user) {
+        throw new Error('No user exists with the provided E-Mail');
+    }
 
-        return true;
-    });
+    return true;
+});
 
-const newEmailValidator = check('email')
-    .custom(async (value) => {
-        const user = await User.findOne({ email: value });
-        if (user) {
-            throw new Error('E-Mail exists already, please pick a different one');
-        }
+const newEmailValidator = check('email').custom(async (value) => {
+    const user = await User.findOne({ email: value });
+    if (user) {
+        throw new Error('E-Mail exists already, please pick a different one');
+    }
 
-        return true;
-    });
+    return true;
+});
 
-const passwordValidator = body('password', 'Please enter a password with only numbers and letters and at least 5 characters long')
+const passwordValidator = body(
+    'password',
+    'Please enter a password with only numbers and letters and at least 5 characters long',
+)
     .isLength({ min: 5 })
     .isAlphanumeric()
     .trim();
@@ -66,17 +70,22 @@ router.get('/login', getLogin);
 router.post('/login', [emailValidator], postLogin);
 router.post('/logout', postLogout);
 router.get('/signup', getSignup);
-router.post('/signup',
-    [nameValidator, emailValidator, newEmailValidator, passwordValidator, confirmPasswordValidator],
+router.post(
+    '/signup',
+    [
+        nameValidator,
+        emailValidator,
+        newEmailValidator,
+        passwordValidator,
+        confirmPasswordValidator,
+    ],
     postSignup,
 );
 router.get('/reset', getReset);
-router.post('/reset',
-    [emailValidator, existingEmailValidator],
-    postReset,
-);
+router.post('/reset', [emailValidator, existingEmailValidator], postReset);
 router.get('/reset/:token', getNewPassword);
-router.post('/new-password',
+router.post(
+    '/new-password',
     [passwordValidator, confirmPasswordValidator],
     postNewPassword,
 );

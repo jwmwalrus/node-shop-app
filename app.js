@@ -24,20 +24,22 @@ const store = new MongoDbStore({
     collection: 'sessions',
 });
 
-app.use(expressEjsLayouts)
+app.use(expressEjsLayouts);
 app.set('view engine', 'ejs');
 app.set('views', 'views');
-app.set('layout', './layouts/main-layout')
+app.set('layout', './layouts/main-layout');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(resolve('public')));
-app.use(cookieParser("cookie-parser-secret"));
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store,
-}));
+app.use(cookieParser('cookie-parser-secret'));
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        store,
+    }),
+);
 
 app.use(csurf(process.env.CSRF_SECRET));
 app.use(flash());
@@ -45,7 +47,7 @@ app.use(flash());
 // middleware to make some variables available to all templates
 app.use((req, res, next) => {
     res.locals.originalUrl = req.originalUrl;
-    res.locals.isAuthenticated = req.session.isAuthenticated ? true : false;
+    res.locals.isAuthenticated = req.session?.isAuthenticated;
     res.locals.csrfToken = req.csrfToken ? req.csrfToken() : '';
     next();
 });
@@ -56,7 +58,7 @@ app.use((req, res, next) => {
             if (req.session && req.session.user) {
                 const user = await User.findById(req.session.user._id);
                 if (!user) {
-                    throw new Error("No user exists for the given session");
+                    throw new Error('No user exists for the given session');
                 }
 
                 req.user = user;
@@ -72,8 +74,8 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
-app.use((req, res, next) => renderError(res, 'Page Not Found', 404));
-app.use((error, req, res, next) => {
+app.use((req, res) => renderError(res, 'Page Not Found', 404));
+app.use((error, req, res) => {
     if (error.render) {
         return error.render(res);
     }

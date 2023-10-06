@@ -7,14 +7,14 @@ import { validationResult } from 'express-validator';
 import User from '../models/user.js';
 import { AppError } from '../middleware/errors.js';
 
-let transporter = nodemailer.createTransport({
-   host: 'smtp.sendgrid.net',
-   port: 587,
-   auth: {
-       user: "apikey",
-       pass: process.env.SENDGRID_API_KEY
-   }
-})
+const transporter = nodemailer.createTransport({
+    host: 'smtp.sendgrid.net',
+    port: 587,
+    auth: {
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY,
+    },
+});
 
 export const getLogin = (req, res) => {
     res.render('auth/login', { pageTitle: 'Login', input: {} });
@@ -105,7 +105,7 @@ export const postSignup = (req, res, next) => {
                 subject: 'Signup succeeded',
                 html: '<h1>You successfully signed up!</h1>',
             });
-            console.info({msgInfo});
+            console.info({ msgInfo });
         } catch (e) {
             next(new AppError('Failed to signup', { cause: e }), req, res);
         }
@@ -143,14 +143,20 @@ export const postReset = (req, res, next) => {
             try {
                 buffer = randomBytes(32);
             } catch (e) {
-                return next(new AppError('Failed to create reset key', { cause: e }), req, res);
+                return next(
+                    new AppError('Failed to create reset key', { cause: e }),
+                    req,
+                    res,
+                );
             }
 
             user.resetToken = buffer.toString('hex');
             user.resetTokenExpiration = Date.now() + 3600000;
             await user.save();
 
-            req.flash('Password reset instructions were sent to the provided email address!');
+            req.flash(
+                'Password reset instructions were sent to the provided email address!',
+            );
             res.redirect('/reset');
 
             const msgInfo = await transporter.sendMail({
@@ -162,14 +168,18 @@ export const postReset = (req, res, next) => {
                 <p>Click on <a href="http://localhost:3000/reset/${user.resetToken}">this link</a> to set a new password.</p>
             `,
             });
-            console.info({msgInfo});
+            console.info({ msgInfo });
         } catch (e) {
-            next(new AppError('Failed to reset password', { cause: e }), req, res);
+            next(
+                new AppError('Failed to reset password', { cause: e }),
+                req,
+                res,
+            );
         }
     })();
 };
 
-export const getNewPassword = (req, res) => {
+export const getNewPassword = (req, res, next) => {
     (async () => {
         try {
             const { token } = req.params;
@@ -180,7 +190,10 @@ export const getNewPassword = (req, res) => {
             });
 
             if (user == null) {
-                req.flash('error', 'Invalid user or reset token already expired');
+                req.flash(
+                    'error',
+                    'Invalid user or reset token already expired',
+                );
                 return res.redirect('/reset');
             }
 
@@ -191,12 +204,18 @@ export const getNewPassword = (req, res) => {
                 input: {},
             });
         } catch (e) {
-            next(new AppError('Failed to render reset-password page', { cause: e }), req, res);
+            next(
+                new AppError('Failed to render reset-password page', {
+                    cause: e,
+                }),
+                req,
+                res,
+            );
         }
     })();
 };
 
-export const postNewPassword = (req, res) => {
+export const postNewPassword = (req, res, next) => {
     const { token, userId } = req.body;
 
     const errors = validationResult(req);
@@ -221,7 +240,10 @@ export const postNewPassword = (req, res) => {
             });
 
             if (user == null) {
-                req.flash('error', 'Invalid user or reset token already expired');
+                req.flash(
+                    'error',
+                    'Invalid user or reset token already expired',
+                );
                 return res.redirect(`/reset/${token}`);
             }
 
@@ -234,7 +256,11 @@ export const postNewPassword = (req, res) => {
 
             res.redirect('/login');
         } catch (e) {
-            next(new AppError('Failed to reset password', { cause: e }), req, res);
+            next(
+                new AppError('Failed to reset password', { cause: e }),
+                req,
+                res,
+            );
         }
     })();
 };
