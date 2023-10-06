@@ -28,7 +28,6 @@ export const getAddProduct = (req, res) => {
         product: {},
         pageTitle: 'Add Product',
         editing: false,
-        input: {},
     });
 };
 
@@ -46,12 +45,19 @@ export const postAddProduct = (req, res, next) => {
     (async () => {
         try {
             const { title, description, price } = req.body;
-            let { imageUrl } = req.body;
+            const { file } = req;
             const priceVal = parseFloat(price).toFixed(2);
 
-            if (imageUrl === '//dummy.png') {
-                imageUrl = '/dummy.png';
+            if (file == null) {
+                req.flash('error', 'Attached file is not an image');
+                return res.status(422).render('admin/edit-product', {
+                    product: { ...req.body },
+                    pageTitle: 'Add Product',
+                    editing: false,
+                });
             }
+
+            const imageUrl = file?.path.replace(/^public/, '') ?? '/dummy.png';
 
             const product = new Product({
                 title,
@@ -114,12 +120,10 @@ export const postEditProduct = (req, res, next) => {
     (async () => {
         try {
             const { title, description, price } = req.body;
-            let { imageUrl } = req.body;
+            const { file } = req;
             const priceVal = parseFloat(price);
 
-            if (imageUrl === '//dummy.png') {
-                imageUrl = '/dummy.png';
-            }
+            const imageUrl = file?.path.replace(/^public/, '') ?? '';
 
             const product = await Product.findOne({ _id: id, user: req.user });
             if (product == null) {
@@ -128,7 +132,9 @@ export const postEditProduct = (req, res, next) => {
             }
 
             product.title = title;
-            product.imageUrl = imageUrl;
+            if (imageUrl) {
+                product.imageUrl = imageUrl;
+            }
             product.description = description;
             product.price = priceVal;
             await product.save();

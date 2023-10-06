@@ -1,37 +1,39 @@
+<% if (product.imageUrl) { %>
+<div class="centered">
+  <div class="image-preview">
+    <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+  </div>
+</div>
+<% } %>
+
 <% if (editing) { %>
-<form class="product-form" action="/admin/edit-product/<%= product.title %>", method="POST" novalidate>
+<form class="product-form" action="/admin/edit-product/<%= product.title %>", method="POST" enctype="multipart/form-data">
   <div class="form-control">
     <label for="id">ID</label>
     <input type="text" name="id" value="<%= product._id %>" readonly>
   </div>
 <% } else { %>
-<form class="product-form" action="/admin/add-product", method="POST" novalidate>
+<form class="product-form" action="/admin/add-product", method="POST" enctype="multipart/form-data">
 <% } %>
   <div class="form-control">
     <label for="title">Title</label>
     <% { %>
       <% const err = locals.errors?.find(e => e.path === 'title'); %>
-      <input type="text" id="title" name="title" class="<%= err ? 'invalid' : ''%>" value="<%= product.title %>" required>
+      <input type="text" id="title" name="title" class="<%= err ? 'invalid' : ''%>" value="<%= product.title %>">
       <% if (err) { %>
         <p class="error"><%= err.msg %> </p>
       <% } %>
     <% } %>
   </div>
   <div class="form-control">
-    <label for="imageUrl">image URL</label>
-    <% { %>
-      <% const err = locals.errors?.find(e => e.path === 'imageUrl'); %>
-      <input type="text" id="imageUrl" name="imageUrl" class="<%= err ? 'invalid' : ''%>" value="<%= product.imageUrl %>">
-      <% if (err) { %>
-        <p class="error"><%= err.msg %> </p>
-      <% } %>
-    <% } %>
+    <label for="image">Image</label>
+    <input type="file" id="image" name="image">
   </div>
   <div class="form-control">
     <label for="price">Price</label>
     <% { %>
       <% const err = locals.errors?.find(e => e.path === 'price'); %>
-      <input type="number" step="0.01" id="price" name="price" class="<%= err ? 'invalid' : ''%>" value="<%= product.price %>" required>
+      <input type="number" step="0.01" id="price" name="price" class="<%= err ? 'invalid' : ''%>" value="<%= product.price %>">
       <% if (err) { %>
         <p class="error"><%= err.msg %> </p>
       <% } %>

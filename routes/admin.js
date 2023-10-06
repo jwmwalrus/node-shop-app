@@ -20,10 +20,8 @@ const titleValidator = body(
     .isLength({ min: 3 })
     .trim();
 
-const imageUrlValidator = body(
-    'imageUrl',
-    'A valid image URL is required',
-).isURL({ allow_protocol_relative_urls: true, require_tld: false });
+// const imageUrlValidator = body('imageUrl', 'A valid image URL is required')
+//     .isURL({ allow_protocol_relative_urls: true, require_tld: false });
 
 const priceValidator = body(
     'price',
@@ -44,14 +42,14 @@ router.get('/products', isAuth, getProducts);
 router.get('/add-product', isAuth, getAddProduct);
 router.post(
     '/add-product',
-    [titleValidator, imageUrlValidator, priceValidator, descriptionValidator],
+    [titleValidator, priceValidator, descriptionValidator],
     isAuth,
     postAddProduct,
 );
 router.get('/edit-product/:productId', isAuth, getEditProduct);
 router.post(
     '/edit-product/:productId',
-    [titleValidator, imageUrlValidator, priceValidator, descriptionValidator],
+    [titleValidator, priceValidator, descriptionValidator],
     isAuth,
     postEditProduct,
 );

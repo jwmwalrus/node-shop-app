@@ -1,3 +1,7 @@
+// import { readFile } from 'fs/promises';
+import { createReadStream } from 'fs';
+import { join, resolve } from 'path';
+
 import Product from '../models/product.js';
 import Order from '../models/order.js';
 
@@ -135,6 +139,44 @@ export const getOrders = (req, res, next) => {
         }
 
         res.render('shop/orders', { orders, pageTitle: 'Orders' });
+    })();
+};
+
+export const getInvoice = (req, res, next) => {
+    const { orderId } = req.params;
+    const invoiceName = `invoice-${orderId}.pdf`;
+    const invoicePath = join(resolve('data'), 'invoices', invoiceName);
+
+    (async () => {
+        try {
+            const order = await Order.findOne({ _id: orderId, user: req.user });
+
+            if (order == null) {
+                req.flash('error', 'Invoice not found');
+                return res.redirect('/orders');
+            }
+
+            // const file = await readFile(invoicePath);
+            const file = createReadStream(invoicePath);
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader(
+                'Content-Disposition',
+                `inline; filename=${invoiceName}`,
+            );
+            // res.send(file);
+            file.pipe(res);
+        } catch (e) {
+            console.error(e);
+            return next(
+                new AppError(`Failed to get invoice ${invoiceName}`, {
+                    code: 404,
+                    cause: e,
+                }),
+                req,
+                res,
+            );
+        }
     })();
 };
 

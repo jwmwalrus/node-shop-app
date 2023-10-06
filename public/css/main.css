@@ -27,7 +27,12 @@ form {
   height: 20rem;
 }
 
-.image img {
+.image-preview {
+  height: 10rem;
+}
+
+.image img,
+.image-preview img {
   height: 100%;
 }
 

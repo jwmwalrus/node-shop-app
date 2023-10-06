@@ -1,14 +1,16 @@
 import { resolve } from 'path';
 
-import 'dotenv/config';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import expressEjsLayouts from 'express-ejs-layouts';
+import session from 'express-session';
+import flash from 'flash';
+import multer from 'multer';
+
+import csurf from 'tiny-csrf';
+import 'dotenv/config';
 import { connect } from 'mongoose';
 import ConnectMongoDb from 'connect-mongodb-session';
-import cookieParser from 'cookie-parser';
-import session from 'express-session';
-import csurf from 'tiny-csrf';
-import flash from 'flash';
 
 import adminRoutes from './routes/admin.js';
 import shopRoutes from './routes/shop.js';
@@ -24,13 +26,33 @@ const store = new MongoDbStore({
     collection: 'sessions',
 });
 
+const storageEngine = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './public/images');
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    },
+});
+
+const fileFilter = (req, file, cb) => {
+    cb(null, ['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype));
+};
+
+// template
 app.use(expressEjsLayouts);
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 app.set('layout', './layouts/main-layout');
 
-app.use(express.urlencoded({ extended: true }));
+// forms
+app.use(express.urlencoded({ extended: false }));
+// FIXME: The storage engine doesn't seem to work
+app.use(multer({ storage: storageEngine, fileFilter }).single('image'));
+// app.use(multer({ dest: './public/images' }).single('image'));
 app.use(express.static(resolve('public')));
+
+// session
 app.use(cookieParser('cookie-parser-secret'));
 app.use(
     session({
@@ -40,11 +62,10 @@ app.use(
         store,
     }),
 );
-
 app.use(csurf(process.env.CSRF_SECRET));
 app.use(flash());
 
-// middleware to make some variables available to all templates
+// make some variables available to all templates
 app.use((req, res, next) => {
     res.locals.originalUrl = req.originalUrl;
     res.locals.isAuthenticated = req.session?.isAuthenticated;
@@ -52,6 +73,7 @@ app.use((req, res, next) => {
     next();
 });
 
+// add up-to-date session user to all requests
 app.use((req, res, next) => {
     (async () => {
         try {
@@ -70,10 +92,12 @@ app.use((req, res, next) => {
     })();
 });
 
+// routes
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
+// catch
 app.use((req, res) => renderError(res, 'Page Not Found', 404));
 app.use((error, req, res) => {
     if (error.render) {
