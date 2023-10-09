@@ -1,3 +1,5 @@
+import { resolve, join } from 'path';
+import { unlink } from 'fs/promises';
 import { validationResult } from 'express-validator';
 
 import Product from '../models/product.js';
@@ -131,8 +133,13 @@ export const postEditProduct = (req, res, next) => {
                 return res.redirect('/admin/products');
             }
 
+            const { imageUrl: oldImageUrl } = product;
+
             product.title = title;
             if (imageUrl) {
+                if (oldImageUrl && oldImageUrl !== '/dummy.png') {
+                    await unlink(join(resolve('public'), oldImageUrl));
+                }
                 product.imageUrl = imageUrl;
             }
             product.description = description;
@@ -151,10 +158,26 @@ export const postEditProduct = (req, res, next) => {
 };
 
 export const postDeleteProduct = (req, res, next) => {
+    const { productId } = req.params;
+
     (async () => {
         try {
+            const product = await Product.findOne({
+                _id: productId,
+                user: req.user,
+            });
+            if (product == null) {
+                req.flash('error', 'Product not found');
+                return res.redirect('/admin/products');
+            }
+
+            const { imageUrl } = product;
+            if (imageUrl && imageUrl !== '/dummy.png') {
+                await unlink(join(resolve('public'), imageUrl));
+            }
+
             await Product.deleteOne({
-                _id: req.params.productId,
+                _id: productId,
                 user: req.user,
             });
         } catch (e) {
