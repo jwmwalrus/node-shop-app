@@ -21,6 +21,7 @@
       </article>
     <% } %>
   </div>
+  <%- include('../includes/pagination.ejs', { totalPages, currentPage }) %>
 <% } else { %>
   <h1>No Products</h1>
 <% } %>
