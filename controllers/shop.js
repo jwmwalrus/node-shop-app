@@ -1,34 +1,77 @@
 // import { readFile } from 'fs/promises';
-import { createReadStream } from 'fs';
+import { createReadStream, createWriteStream, existsSync } from 'fs';
 import { join, resolve } from 'path';
+import PDFDocument from 'pdfkit';
 
 import Product from '../models/product.js';
 import Order from '../models/order.js';
 
 import { AppError } from '../middleware/errors.js';
 
+const ITEMS_PER_PAGE = 2;
+
 export const getIndex = (req, res, next) => {
+    const { page } = req.query;
+    const currentPage = page == null ? 1 : Number(page);
+    console.log({ currentPage });
+
     (async () => {
-        let products = [];
         try {
-            products = await Product.find();
+            let products = [];
+            const totalProducts = await Product.find().count();
+            if (totalProducts > 0) {
+                products = await Product.find()
+                    .skip((currentPage - 1) * ITEMS_PER_PAGE)
+                    .limit(ITEMS_PER_PAGE);
+            }
+
+            let totalPages = Math.floor(totalProducts / ITEMS_PER_PAGE);
+            totalPages += totalProducts % ITEMS_PER_PAGE > 0 ? 1 : 0;
+            totalPages = totalPages > 0 ? totalPages : 1;
+            res.render('shop/index', {
+                prods: products,
+                pageTitle: 'Index',
+                totalProducts,
+                totalPages,
+                currentPage,
+            });
         } catch (e) {
+            console.error(e);
             return next(
                 new AppError('Failed to get products', { code: 500, cause: e }),
                 req,
                 res,
             );
         }
-
-        res.render('shop/index', { prods: products, pageTitle: 'Index' });
     })();
 };
 
 export const getProducts = (req, res, next) => {
+    const { page } = req.query;
+    const currentPage = page == null ? 1 : Number(page);
+    console.log({ currentPage });
+
     (async () => {
-        let products = [];
         try {
-            products = await Product.find();
+            let products = [];
+            const totalProducts = await Product.find().countDocuments();
+            if (totalProducts > 0) {
+                products = await Product.find()
+                    .skip((currentPage - 1) * ITEMS_PER_PAGE)
+                    .limit(ITEMS_PER_PAGE);
+            }
+
+            let totalPages = Math.floor(totalProducts / ITEMS_PER_PAGE);
+            totalPages += totalProducts % ITEMS_PER_PAGE > 0 ? 1 : 0;
+            totalPages = totalPages > 0 ? totalPages : 1;
+
+            res.render('shop/product-list', {
+                prods: products,
+                pageTitle: 'Shop',
+                totalProducts,
+                currentPage,
+                totalPages,
+            });
         } catch (e) {
             return next(
                 new AppError('Failed to get products', { code: 500, cause: e }),
@@ -36,7 +79,6 @@ export const getProducts = (req, res, next) => {
                 res,
             );
         }
-        res.render('shop/product-list', { prods: products, pageTitle: 'Shop' });
     })();
 };
 
@@ -156,16 +198,43 @@ export const getInvoice = (req, res, next) => {
                 return res.redirect('/orders');
             }
 
-            // const file = await readFile(invoicePath);
-            const file = createReadStream(invoicePath);
-
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader(
                 'Content-Disposition',
                 `inline; filename=${invoiceName}`,
             );
-            // res.send(file);
-            file.pipe(res);
+
+            if (existsSync(invoicePath)) {
+                // const file = await readFile(invoicePath);
+                const file = createReadStream(invoicePath);
+                // res.send(file);
+                file.pipe(res);
+                return;
+            }
+
+            const pdfDoc = new PDFDocument();
+            pdfDoc.pipe(createWriteStream(invoicePath));
+            pdfDoc.pipe(res);
+
+            pdfDoc
+                .fontSize(26)
+                .text(`Invoice #${order._id}`, { underline: true });
+            pdfDoc.text('______________________________');
+
+            let totalPrice = 0;
+            order.items.forEach((item) => {
+                totalPrice += item.quantity * item.product.price;
+                pdfDoc
+                    .fontSize(14)
+                    .text(
+                        `${item.product.title} - ${item.quantity} x $${item.product.price}`,
+                    );
+            });
+
+            pdfDoc.fontSize(26).text('______________________________');
+            pdfDoc.fontSize(20).text(`Total Price: $${totalPrice}`);
+
+            pdfDoc.end();
         } catch (e) {
             console.error(e);
             return next(
