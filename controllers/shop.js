@@ -13,7 +13,6 @@ const ITEMS_PER_PAGE = 2;
 export const getIndex = (req, res, next) => {
     const { page } = req.query;
     const currentPage = page == null ? 1 : Number(page);
-    console.log({ currentPage });
 
     (async () => {
         try {
@@ -49,7 +48,6 @@ export const getIndex = (req, res, next) => {
 export const getProducts = (req, res, next) => {
     const { page } = req.query;
     const currentPage = page == null ? 1 : Number(page);
-    console.log({ currentPage });
 
     (async () => {
         try {
