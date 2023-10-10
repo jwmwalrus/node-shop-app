@@ -157,7 +157,7 @@ export const postEditProduct = (req, res, next) => {
     })();
 };
 
-export const postDeleteProduct = (req, res, next) => {
+export const deleteProduct = (req, res) => {
     const { productId } = req.params;
 
     (async () => {
@@ -167,8 +167,7 @@ export const postDeleteProduct = (req, res, next) => {
                 user: req.user,
             });
             if (product == null) {
-                req.flash('error', 'Product not found');
-                return res.redirect('/admin/products');
+                return res.status(404).json({ msg: 'Product not found' });
             }
 
             const { imageUrl } = product;
@@ -180,14 +179,11 @@ export const postDeleteProduct = (req, res, next) => {
                 _id: productId,
                 user: req.user,
             });
+            res.status(200).json({ msg: 'Success' });
         } catch (e) {
-            return next(
-                new AppError('Failed to delete product', { cause: e }),
-                req,
-                res,
-            );
+            return res
+                .status(500)
+                .json({ msg: `Failed to delete product: ${e.message}` });
         }
-
-        res.redirect('/admin/products');
     })();
 };

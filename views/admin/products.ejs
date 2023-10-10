@@ -16,10 +16,9 @@
           <form action="/admin/edit-product/<%= product._id %>/?edit=true">
             <button type="submit" class="btn">Edit</button>
           </form>
-          <form action="/admin/delete-product/<%= product._id %>" method="POST">
-            <button type="submit" class="btn">Delete</button>
-            <%- include('../includes/csrf-token.ejs') %>
-          </form>
+          <button type="button" class="btn" onclick="deleteProduct(this);">Delete</button>
+          <input type="hidden" id="productId" name="productId" value="<%= product._id %>"  />
+          <%- include('../includes/csrf-token.ejs') %>
         </div>
       </article>
     <% } %>
@@ -30,5 +29,5 @@
 
 <%- contentFor('styles') %>
 <link rel="stylesheet" href="/css/product.css">
-
+<script src="/js/admin.js" defer></script>
 
