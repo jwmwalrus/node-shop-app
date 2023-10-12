@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router } from 'express';
 
 import {
     getIndex,
@@ -15,7 +15,7 @@ import {
 
 import isAuth from '../middleware/is-auth.js';
 
-const router = express.Router();
+const router = Router();
 
 router.get('/', getIndex);
 router.get('/products', getProducts);

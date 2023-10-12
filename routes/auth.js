@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router } from 'express';
 import { check, body } from 'express-validator';
 
 import User from '../models/user.js';
@@ -64,7 +64,7 @@ const confirmPasswordValidator = body('confirmPassword')
     })
     .trim();
 
-const router = express.Router();
+const router = Router();
 
 router.get('/login', getLogin);
 router.post('/login', [emailValidator], postLogin);
