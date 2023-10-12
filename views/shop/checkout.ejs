@@ -1,4 +1,35 @@
-<h1>There's nothing to checkout</h1>
+<% if (products.length > 0) { %>
+  <h1><%= pageTitle %></h1>
+  <div class="cart">
+    <ul>
+      <% products.forEach(p => { %>
+        <li>
+          <h1><%= p.product.title %></h1>
+          <h2>Quantity: <%= p.quantity %></h2>
+        </li>
+      <% }) %>
+    </ul>
+    <hr />
+    <div>
+      <h2>Total: <%= totalSum %></h2>
+    </div>
+    <div className="centered">
+      <button id="order-btn" class="btn">ORDER</button>
+      <script src="https://js.stripe.com/v3/"></script>
+      <script>
+        var stripe = Stripe('pk_test_51NzmkAEZaPFaqZAi2bUq6vwLguzu24FI9T63IdBs3NQMgde7U66yyQx8LCQcNGPFRhQgIqogzSWBTpGsf9UXQOld000be1IW6S');
+        var orderBtn = document.getElementById('order-btn');
+        orderBtn.addEventListener('click', function() {
+          stripe.redirectToCheckout({ sessionId: '<%= sessionId %>' });
+        });
+      </script>
+    </div>
+  </div>
+<% } else { %>
+  <h1>No Products in Cart!</h1>
+<% } %>
 
 <%- contentFor('styles') %>
+<link rel="stylesheet" href="/css/cart.css">
+<link rel="stylesheet" href="/css/forms.css">
 

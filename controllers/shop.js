@@ -2,6 +2,7 @@
 import { createReadStream, createWriteStream, existsSync } from 'fs';
 import { join, resolve } from 'path';
 import PDFDocument from 'pdfkit';
+import Stripe from 'stripe';
 
 import Product from '../models/product.js';
 import Order from '../models/order.js';
@@ -9,6 +10,7 @@ import Order from '../models/order.js';
 import { AppError } from '../middleware/errors.js';
 
 const ITEMS_PER_PAGE = 2;
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const getIndex = (req, res, next) => {
     const { page } = req.query;
@@ -35,7 +37,6 @@ export const getIndex = (req, res, next) => {
                 currentPage,
             });
         } catch (e) {
-            console.error(e);
             return next(
                 new AppError('Failed to get products', { code: 500, cause: e }),
                 req,
@@ -234,7 +235,6 @@ export const getInvoice = (req, res, next) => {
 
             pdfDoc.end();
         } catch (e) {
-            console.error(e);
             return next(
                 new AppError(`Failed to get invoice ${invoiceName}`, {
                     code: 404,
@@ -274,6 +274,78 @@ export const postOrder = (req, res, next) => {
     })();
 };
 
-export const getCheckout = (req, res) => {
-    res.render('shop/checkout', { pageTitle: 'Checkout' });
+export const getCheckoutSuccess = (req, res, next) => {
+    (async () => {
+        try {
+            const user = await req.user.populate('cart.items.product');
+            const order = new Order({ items: user.cart.items, user: req.user });
+
+            if (order.items.length === 0) {
+                res.redirect('/cart');
+                return;
+            }
+
+            await order.save();
+
+            req.user.cart = { items: [] };
+            await req.user.save();
+        } catch (e) {
+            return next(
+                new AppError('Failed to create order', { code: 400, cause: e }),
+                req,
+                res,
+            );
+        }
+
+        res.redirect('/orders');
+    })();
+};
+
+export const getCheckout = (req, res, next) => {
+    (async () => {
+        try {
+            const user = await req.user.populate('cart.items.product');
+            const { items } = user.cart;
+            let totalSum = 0;
+            items.forEach((item) => {
+                totalSum += item.quantity * item.product.price;
+            });
+
+            const stripeSession = await stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: items.map((item) => ({
+                    quantity: item.quantity,
+                    price_data: {
+                        unit_amount: item.product.price * 100,
+                        currency: 'usd',
+                        product_data: {
+                            name: item.product.title,
+                            description: item.product.description,
+                        },
+                    },
+                })),
+                mode: 'payment',
+                success_url:
+                    req.protocol +
+                    '://' +
+                    req.get('host') +
+                    '/checkout/success',
+                cancel_url:
+                    req.protocol + '://' + req.get('host') + '/checkout/camce;',
+            });
+
+            res.render('shop/checkout', {
+                pageTitle: 'Checkout',
+                products: user.cart.items,
+                totalSum,
+                sessionId: stripeSession.id,
+            });
+        } catch (e) {
+            return next(
+                new AppError('Failed to create order', { code: 400, cause: e }),
+                req,
+                res,
+            );
+        }
+    })();
 };
