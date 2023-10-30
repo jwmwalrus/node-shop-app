@@ -1,4 +1,8 @@
-import { resolve } from 'path';
+import { resolve, join } from 'path';
+import { createWriteStream } from 'fs';
+import { readFile } from 'fs/promises';
+import { createServer } from 'http';
+// import { createServer } from 'https';
 
 import express from 'express';
 import cookieParser from 'cookie-parser';
@@ -6,11 +10,14 @@ import expressEjsLayouts from 'express-ejs-layouts';
 import session from 'express-session';
 import flash from 'flash';
 import multer from 'multer';
+import compression from 'compression';
 
 import csurf from 'tiny-csrf';
 import 'dotenv/config';
 import { connect } from 'mongoose';
 import ConnectMongoDb from 'connect-mongodb-session';
+import helmet from 'helmet';
+import morgan from 'morgan';
 
 import adminRoutes from './routes/admin.js';
 import shopRoutes from './routes/shop.js';
@@ -21,6 +28,10 @@ import User from './models/user.js';
 const MongoDbStore = ConnectMongoDb(session);
 
 const app = express();
+
+// const privateKey = await readFile(join(resolve('certs'), 'server.key'));
+// const certificate = await readFile(join(resolve('certs'), 'server.cert'));
+
 const store = new MongoDbStore({
     uri: process.env.MONGODB_URI,
     collection: 'sessions',
@@ -38,6 +49,14 @@ const storageEngine = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
     cb(null, ['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype));
 };
+
+app.use(helmet());
+app.use(compression());
+
+const accessLogStream = createWriteStream(join(resolve('.'), 'access.log'), {
+    flags: 'a',
+});
+app.use(morgan('combined', { stream: accessLogStream }));
 
 // template
 app.use(expressEjsLayouts);
@@ -110,7 +129,9 @@ app.use((error, req, res) => {
 
 try {
     await connect(process.env.MONGODB_URI);
-    app.listen(3000);
+    // const server = createServer({ key: privateKey, cert: certificate }, app);
+    const server = createServer(app);
+    server.listen(process.env.PORT || 3000);
 } catch (e) {
     console.error(e);
 }

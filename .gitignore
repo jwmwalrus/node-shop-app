@@ -3,4 +3,6 @@
 !/public/images/.gitkeep
 /data/*
 !/data/.gitkeep
+/certs/*
+!/certs/.gitkeep
 .env
